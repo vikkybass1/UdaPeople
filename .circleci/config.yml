@@ -70,33 +70,33 @@ jobs:
           key: backend-build
 
   test-frontend:
-    #docker:
+    docker:
       # Docker image here
-    #steps:
+    steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
                 
   test-backend:
-    #docker:
+    docker:
       # Docker image here
-    #steps:
+    steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
             
   scan-frontend:
-    #docker:
+    docker:
       # Docker image here
-    #steps:
+    steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
 
   scan-backend:
-    #docker:
+    docker:
       # Docker image here
-    #steps:
+    steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
