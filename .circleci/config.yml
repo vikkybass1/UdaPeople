@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  slack: circleci/slack@4.1
 
 commands:
   destroy-environment:
@@ -315,9 +317,34 @@ jobs:
             then
               # your code here
             fi
-              
+  notify:
+  docker:
+    - image: 'cimg/base:stable'
+  steps:
+    - slack/notify:
+        custom: |
+          {
+            "blocks": [
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "plain_text",
+                    "text": "*This is a text notification*",
+                    "emoji": true
+                  }
+                ]
+              }
+            ]
+          }
+        event: always
+            
 
 workflows:
+  send-notification:
+    jobs:
+      - notify:
+          context: slack-secrets
   default:
     jobs:
       - build-frontend
