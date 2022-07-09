@@ -69,34 +69,34 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
 
-  test-frontend:
-    docker:
+  #test-frontend:
+    #docker:
       # Docker image here
-    steps:
+    #steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
                 
-  test-backend:
-    docker:
+  #test-backend:
+    #docker:
       # Docker image here
-    steps:
+    #steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
             
-  scan-frontend:
-    docker:
+  #scan-frontend:
+    #docker:
       # Docker image here
-    steps:
+    #steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
 
-  scan-backend:
-    docker:
+  #scan-backend:
+    #docker:
       # Docker image here
-    steps:
+    #steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
