@@ -170,7 +170,7 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"\
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"\
-              --tags Name=backend-${CIRCLE_WORKFLOW_ID:0:7}
+              --tags project=udapeople
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -178,7 +178,7 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"\
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags Name=frontend-${CIRCLE_WORKFLOW_ID:0:7}
+              --tags project=udapeople
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -205,7 +205,7 @@ jobs:
       # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints: 
-            - "44:c6:5c:d8:10:3f:05:b1:c3:c1:b8:9e:92:75:23:f8"
+            - "e6:a9:73:20:9c:bb:a8:10:d3:e7:6e:b1:ca:2e:58:8a"
       # attach workspace
       - attach_workspace:
           at: ~/
