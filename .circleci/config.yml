@@ -121,6 +121,7 @@ jobs:
           command: |
             # Your code here
             cd frontend
+            npm install
             npm audit fix --audit-level=critical --force
 
   scan-backend:
