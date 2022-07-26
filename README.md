@@ -62,3 +62,6 @@ Before you submit your project, please check your work against the project rubri
 ### License
 
 [License](LICENSE.md)
+
+## Authors
+* Victor Ng [![M](https://upload.wikimedia.org/wikipedia/fr/thumb/c/c8/Twitter_Bird.svg/30px-Twitter_Bird.svg.png)](https://twitter.com/vikkybass1)
