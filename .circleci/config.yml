@@ -280,9 +280,9 @@ jobs:
             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ".env"
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ".env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ".env"
-            npm run migrations > migrations_dump.txt
-            cat migrations_dump.txt
-            migration_succesful=$(cat migrations_dump.txt | grep -c "has been executed successfully")
+            npm run migrations > migration.log
+            cat migration.log
+            migration_succesful=$(cat migration.log | grep -c "has been executed successfully")
             if [ $migration_succesful > 0 ]; then exit 0; else exit 1; fi;
       - run:
           name: Send migration results to memstash
@@ -296,7 +296,7 @@ jobs:
       #     name: Revert migrations
       #     when: on_fail
       - revert-migrations
-      - destroy-environment  
+      - destroy-environment       
 
   deploy-frontend:
     docker:
@@ -304,40 +304,100 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install AWS CLI dependencies
+          working_directory: /tmp
+          command: |
+            sudo apt-get update && sudo apt-get install -yy less
+            sudo apt-get install unzip -y
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            cd frontend
+            npm i
       - run:
           name: Get backend url
           command: |
             # your code here
-            export API_URL="http://${BACKEND_IP}:3030"
+            touch ".env"
+            BACKEND_ip=$(aws ec2 describe-instances --region eu-central-1  \
+                --filters "Name=tag:Name, Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+                --query "Reservations[].Instances[*].PublicIpAddress" \
+                --output text)            
+            export API_URL="${BACKEND_ip}:3030"
+            
+            echo "API_URL=${API_URL}" >> .env
             echo "${API_URL}"
+            echo ${CIRCLE_WORKFLOW_ID:0:7}
+            echo "udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
+            export API_URL="http://${BACKEND_ip}:3030"
+            echo API_URL="${API_URL}" >> frontend/.env
+            cat frontend/.env
       - run:
           name: Deploy frontend objects
           command: |
             # your code here
-      # Here's where you will add some code to rollback on failure      
-                    
+            echo ENVIRONMENT=production >> frontend/.env
+            echo NODE_ENV=production >> frontend/.env
+            cd frontend
+            npm audit fix --audit-level=critical 
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      # Here's where you will add some code to rollback on failure
+      - revert-migrations
+      - destroy-environment   
+                         
   deploy-backend:
     docker:
       # Docker image here that supports Ansible
       - image: python:3.7-alpine3.11
     steps:
       # Checkout code from git
+      - checkout
       # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ['44:c6:5c:d8:10:3f:05:b1:c3:c1:b8:9e:92:75:23:f8']
       # attach workspace
+      - attach_workspace:
+          at: ~/
+      - attach_workspace:
+          at: /tmp/workspace
+      - restore_cache:
+          key: backend-build
       - run:
           name: Install dependencies
           command: |
             # your code here
+            apk add --update ansible openssh-client tar gzip curl nodejs npm
+            pip install awscli
       - run:
           name: Deploy backend
+          no_output_timeout: 20m
           command: |
             # your code here
-      # Here's where you will add some code to rollback on failure  
-
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            # Zip the directory
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            export ANSIBLE_HOST_KEY_CHECKING=False
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      # Here's where you will add some code to rollback on failure 
+      - revert-migrations
+      - destroy-environment 
+      
   smoke-test:
     docker:
       # Lightweight Docker image 
