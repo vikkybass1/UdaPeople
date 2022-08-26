@@ -283,7 +283,7 @@ jobs:
             npm run migrations > migration.log
             cat migration.log
             migration_succesful=$(cat migration.log | grep -c "has been executed successfully")
-            if [ $migration_succesful > 0 ]; then exit 0; else exit 1; fi;
+            if [ $migration_succesful > 0 ]; then exit 0; fi;
       - run:
           name: Send migration results to memstash
           command: |
